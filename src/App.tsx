@@ -2,6 +2,7 @@ import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState }
 import AutoScroll from 'embla-carousel-auto-scroll'
 import useEmblaCarousel from 'embla-carousel-react'
 import './App.css'
+import { trackLyrics } from './lyrics'
 
 const siteBase = '/fragments-from-above-site'
 const albumLink = 'https://linkco.re/3eCyT3YF'
@@ -250,6 +251,7 @@ function YouTubePreview({
 function App() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null)
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null)
+  const [activeModalPanel, setActiveModalPanel] = useState<'info' | 'lyric'>('info')
   const [albumActionLabel, setAlbumActionLabel] = useState(() => getAlbumActionLabel())
   const [showFloatingAlbumLink, setShowFloatingAlbumLink] = useState(false)
   const heroSectionRef = useRef<HTMLElement | null>(null)
@@ -299,16 +301,19 @@ function App() {
 
   const openTrackModal = useCallback((track: Track) => {
     setActiveVideoId(null)
+    setActiveModalPanel('info')
     setSelectedTrack(track)
   }, [])
 
   const closeTrackModal = useCallback(() => {
     setActiveVideoId(null)
+    setActiveModalPanel('info')
     setSelectedTrack(null)
   }, [])
 
   const moveTrackModal = useCallback((track: Track) => {
     setActiveVideoId(null)
+    setActiveModalPanel('info')
     setSelectedTrack(track)
   }, [])
 
@@ -743,6 +748,7 @@ function App() {
           const previousTrack = tracks[(selectedTrackIndex - 1 + tracks.length) % tracks.length]
           const nextTrack = tracks[(selectedTrackIndex + 1) % tracks.length]
           const selectedYoutubeId = getYouTubeId(selectedTrack.href)
+          const selectedLyrics = trackLyrics[selectedTrack.no]
 
           return (
             <div
@@ -753,7 +759,7 @@ function App() {
               onClick={closeTrackModal}
             >
               <div className="track-modal-shell" onClick={(event) => event.stopPropagation()}>
-                <div className="track-modal-panel">
+                <div className={`track-modal-panel ${activeModalPanel === 'lyric' ? 'is-lyric-view' : ''}`}>
                   <button className="modal-close" type="button" aria-label="Close" onClick={closeTrackModal}>
                     &times;
                   </button>
@@ -770,30 +776,61 @@ function App() {
                     </span>
                     <h2 id="track-modal-title">{selectedTrack.displayTitle ?? selectedTrack.title}</h2>
                     <p>{selectedTrack.note}</p>
-                    {selectedYoutubeId ? (
-                      <YouTubePreview
-                        track={selectedTrack}
-                        videoId={selectedYoutubeId}
-                        isPlaying={activeVideoId === selectedYoutubeId}
-                        onPlay={() => setActiveVideoId(selectedYoutubeId)}
-                      />
-                    ) : null}
-                    <dl>
-                      {selectedTrack.release ? (
-                        <div>
-                          <dt>Release</dt>
-                          <dd>{selectedTrack.release}</dd>
-                        </div>
-                      ) : null}
-                      <div>
-                        <dt>Producer</dt>
-                        <dd>{selectedTrack.producer}</dd>
+                    <div className="modal-panel-tabs" role="tablist" aria-label={`${selectedTrack.title} details`}>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeModalPanel === 'info'}
+                        className={activeModalPanel === 'info' ? 'is-active' : ''}
+                        onClick={() => setActiveModalPanel('info')}
+                      >
+                        INFO
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeModalPanel === 'lyric'}
+                        className={activeModalPanel === 'lyric' ? 'is-active' : ''}
+                        onClick={() => {
+                          setActiveVideoId(null)
+                          setActiveModalPanel('lyric')
+                        }}
+                      >
+                        LYRIC
+                      </button>
+                    </div>
+                    {activeModalPanel === 'info' ? (
+                      <div className="modal-info-panel" role="tabpanel">
+                        {selectedYoutubeId ? (
+                          <YouTubePreview
+                            track={selectedTrack}
+                            videoId={selectedYoutubeId}
+                            isPlaying={activeVideoId === selectedYoutubeId}
+                            onPlay={() => setActiveVideoId(selectedYoutubeId)}
+                          />
+                        ) : null}
+                        <dl>
+                          {selectedTrack.release ? (
+                            <div>
+                              <dt>Release</dt>
+                              <dd>{selectedTrack.release}</dd>
+                            </div>
+                          ) : null}
+                          <div>
+                            <dt>Producer</dt>
+                            <dd>{selectedTrack.producer}</dd>
+                          </div>
+                          <div>
+                            <dt>Lyric</dt>
+                            <dd>ODORISE KOU</dd>
+                          </div>
+                        </dl>
                       </div>
-                      <div>
-                        <dt>Lyric</dt>
-                        <dd>ODORISE KOU</dd>
+                    ) : (
+                      <div className="modal-lyric-panel" role="tabpanel">
+                        <pre>{selectedLyrics}</pre>
                       </div>
-                    </dl>
+                    )}
                   </div>
                 </div>
                 <div className="modal-track-nav" aria-label="Track navigation">

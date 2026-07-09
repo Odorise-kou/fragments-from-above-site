@@ -827,6 +827,7 @@ h1 {
 .track-modal-panel {
   position: relative;
   width: 100%;
+  height: min(760px, calc(100svh - clamp(24px, 4vw, 56px)));
   max-height: calc(100svh - clamp(24px, 4vw, 56px));
   display: grid;
   grid-template-columns: minmax(300px, 0.88fr) minmax(0, 1fr);
@@ -879,6 +880,10 @@ h1 {
   border: 1px solid rgba(244, 241, 232, 0.24);
   min-height: 0;
   background: rgba(244, 241, 232, 0.055);
+  transition:
+    width 240ms ease,
+    margin 240ms ease,
+    transform 240ms ease;
 }
 
 .modal-artwork img,
@@ -1109,6 +1114,75 @@ h1 {
   margin: 0;
 }
 
+.modal-panel-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  margin-top: 22px;
+  border: 1px solid rgba(244, 241, 232, 0.2);
+}
+
+.modal-panel-tabs button {
+  border: 0;
+  border-right: 1px solid rgba(244, 241, 232, 0.18);
+  padding: 11px 12px;
+  color: var(--muted);
+  background: rgba(244, 241, 232, 0.025);
+  font-family: Bahnschrift, "Segoe UI", sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.modal-panel-tabs button:last-child {
+  border-right: 0;
+}
+
+.modal-panel-tabs button:hover,
+.modal-panel-tabs button:focus-visible,
+.modal-panel-tabs button.is-active {
+  color: rgba(244, 241, 232, 0.92);
+  background: rgba(244, 241, 232, 0.09);
+  outline: none;
+}
+
+.modal-info-panel,
+.modal-lyric-panel {
+  display: grid;
+  min-height: 0;
+}
+
+.modal-lyric-panel {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.modal-lyric-panel pre {
+  max-height: min(43svh, 500px);
+  overflow: auto;
+  margin: 0;
+  padding: 18px 0 4px;
+  color: rgba(244, 241, 232, 0.82);
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: clamp(13px, 1.24vw, 15px);
+  line-height: 1.86;
+  white-space: pre-wrap;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(244, 241, 232, 0.28) transparent;
+}
+
+.modal-lyric-panel pre::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-lyric-panel pre::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(244, 241, 232, 0.28);
+}
+
 .modal-track-nav {
   position: absolute;
   left: 0;
@@ -1303,9 +1377,19 @@ h1 {
   }
 
   .track-modal-panel {
+    width: 100%;
+    height: auto;
     max-height: none;
     gap: 12px;
     overflow: visible;
+    justify-self: center;
+    transition:
+      width 240ms ease,
+      transform 240ms ease;
+  }
+
+  .track-modal-panel.is-lyric-view {
+    width: calc(100% - 18px);
   }
 
   .modal-artwork,
@@ -1316,6 +1400,11 @@ h1 {
   .modal-artwork {
     width: min(78vw, 300px);
     margin-left: 0;
+  }
+
+  .track-modal-panel.is-lyric-view .modal-artwork {
+    width: min(34vw, 136px);
+    transform: translateY(-4px);
   }
 
   .modal-copy {
